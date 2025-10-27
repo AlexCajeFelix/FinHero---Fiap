@@ -65,18 +65,22 @@ jobs:
           maven-version: ${{ steps.config.outputs.maven_version }}
       
       - name: Build with Maven
+        working-directory: finhero
         run: mvn clean install -DskipTests
         
       - name: Run tests with JaCoCo
         if: steps.config.outputs.jacoco_enabled == 'true'
+        working-directory: finhero
         run: mvn jacoco:prepare-agent test jacoco:report
         
       - name: Run tests without JaCoCo
         if: steps.config.outputs.jacoco_enabled != 'true'
+        working-directory: finhero
         run: mvn test
       
       - name: Generate JaCoCo Report
         if: steps.config.outputs.jacoco_enabled == 'true'
+        working-directory: finhero
         run: mvn jacoco:report
         continue-on-error: true
         
@@ -84,7 +88,7 @@ jobs:
         if: steps.config.outputs.jacoco_enabled == 'true'
         uses: irongut/CodeCoverageSummary@v1.3.0
         with:
-          coverage-files: ${{ steps.config.outputs.jacoco_report }}
+          coverage-files: finhero/${{ steps.config.outputs.jacoco_report }}
           token: ${{ secrets.GITHUB_TOKEN }}
           badge: false
           format: markdown
@@ -93,9 +97,10 @@ jobs:
       - name: Check coverage threshold
         if: steps.config.outputs.jacoco_enabled == 'true'
         id: coverage_check
+        working-directory: finhero
         run: |
-          if [ -f ${{ steps.config.outputs.jacoco_report }} ]; then
-            COVERAGE=$(grep -oP 'type="INSTRUCTION" covered=\K[0-9]+' ${{ steps.config.outputs.jacoco_report }} | head -1 || echo "0")
+          if [ -f target/site/jacoco/jacoco.xml ]; then
+            COVERAGE=$(grep -oP 'type="INSTRUCTION" covered=\K[0-9]+' target/site/jacoco/jacoco.xml | head -1 || echo "0")
             echo "Current coverage: $COVERAGE%"
             echo "Minimum required: ${{ steps.config.outputs.min_coverage }}%"
             
@@ -111,16 +116,16 @@ jobs:
           echo "## Test Results Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
-          if [ -d target/surefire-reports ]; then
+          if [ -d finhero/target/surefire-reports ]; then
             echo "### Surefire Reports" >> $GITHUB_STEP_SUMMARY
-            echo "Reports location: target/surefire-reports" >> $GITHUB_STEP_SUMMARY
+            echo "Reports location: finhero/target/surefire-reports" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
           fi
           
-          if [ "${{ steps.config.outputs.jacoco_enabled }}" == "true" ] && [ -f ${{ steps.config.outputs.jacoco_report }} ]; then
+          if [ "${{ steps.config.outputs.jacoco_enabled }}" == "true" ] && [ -f finhero/target/site/jacoco/jacoco.xml ]; then
             echo "### JaCoCo Coverage" >> $GITHUB_STEP_SUMMARY
-            echo "Coverage report: ${{ steps.config.outputs.jacoco_report }}" >> $GITHUB_STEP_SUMMARY
-            echo "HTML report: target/site/jacoco/index.html" >> $GITHUB_STEP_SUMMARY
+            echo "Coverage report: finhero/target/site/jacoco/jacoco.xml" >> $GITHUB_STEP_SUMMARY
+            echo "HTML report: finhero/target/site/jacoco/index.html" >> $GITHUB_STEP_SUMMARY
             echo "Minimum coverage: ${{ steps.config.outputs.min_coverage }}%" >> $GITHUB_STEP_SUMMARY
           fi
           
