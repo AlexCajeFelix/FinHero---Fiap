@@ -24,14 +24,7 @@ jobs:
         with:
           fetch-depth: 0
       
-      - name: Run YAML to Github Output Action
-        id: settings-parser
-        uses: cristian-ci/action-yaml-github-output@v2
-        with:
-          file_path: './settings.yml'
-      
       - name: SonarCloud Scan
-        if: steps.settings-parser.outputs.sonarcloud_organization != '' && steps.settings-parser.outputs.sonarcloud_project_key != ''
         uses: sonarsource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -46,9 +39,9 @@ jobs:
       - name: Build Docker Image
         working-directory: '${{ inputs.docker-file-path }}'
         run: |
-          docker build -t ${{ steps.settings-parser.outputs.docker_registry }}/${{ steps.settings-parser.outputs.docker_name }}:${{ steps.settings-parser.outputs.docker_tag }} .
+          docker build -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/finhero-app:latest .
       
       - name: Push Docker Image
         working-directory: '${{ inputs.docker-file-path }}'
         run: |
-          docker push ${{ steps.settings-parser.outputs.docker_registry }}/${{ steps.settings-parser.outputs.docker_name }}:${{ steps.settings-parser.outputs.docker_tag }}
+          docker push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/finhero-app:latest
