@@ -49,3 +49,4 @@ docker:
   registry: "ghcr.io"
   username: ""  # Deixe vazio
 ```
+test workflow
