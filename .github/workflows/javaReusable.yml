@@ -122,3 +122,27 @@ jobs:
           echo "JaCoCo enabled: ${{ steps.config.outputs.jacoco_enabled }}" >> $GITHUB_STEP_SUMMARY
           echo "Java version: ${{ steps.config.outputs.java_version }}" >> $GITHUB_STEP_SUMMARY
           echo "Maven version: ${{ steps.config.outputs.maven_version }}" >> $GITHUB_STEP_SUMMARY
+
+  create-pull-request:
+    name: Create pull request
+    runs-on: ${{ inputs.runs-on }}
+    needs: build
+   
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          title: "Test: Build and Test Results"
+          body: |
+            ## Test Results
+            
+            - Java version: ${{ steps.config.outputs.java_version }}
+            - Maven version: ${{ steps.config.outputs.maven_version }}
+            - JaCoCo enabled: ${{ steps.config.outputs.jacoco_enabled }}
+            
+            Tests executed successfully! ✅
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: test-workflow-results
