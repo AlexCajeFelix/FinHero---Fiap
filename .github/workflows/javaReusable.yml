@@ -122,19 +122,3 @@ jobs:
           echo "JaCoCo enabled: ${{ steps.config.outputs.jacoco_enabled }}" >> $GITHUB_STEP_SUMMARY
           echo "Java version: ${{ steps.config.outputs.java_version }}" >> $GITHUB_STEP_SUMMARY
           echo "Maven version: ${{ steps.config.outputs.maven_version }}" >> $GITHUB_STEP_SUMMARY
-
-  create-pull-request:
-    name: Create pull request
-    runs-on: ${{ inputs.runs-on }}
-    needs: build
-   
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Create pull request
-        uses: vsoch/pull-request-action@v3
-        with:
-          title: "Update Java version to ${{ inputs.java-version }}"
-          body: "This PR updates the Java version to ${{ inputs.java-version }}"
-          token: ${{ secrets.GITHUB_TOKEN }}
