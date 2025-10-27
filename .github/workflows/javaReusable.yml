@@ -70,6 +70,20 @@ jobs:
         with:
           maven-version: ${{ steps.config.outputs.maven_version }}
       
+      - name: Cache SonarQube packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      
       - name: Build with Maven
         working-directory: finhero
         run: mvn clean install -DskipTests
@@ -106,11 +120,11 @@ jobs:
             fi
           fi
       
-      - name: SonarCloud Scan
+      - name: Build and analyze
         working-directory: finhero
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn sonar:sonar
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=finhero_fiap_projeto-finhero
         continue-on-error: true
       
       - name: Generate test summary
