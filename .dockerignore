@@ -1,0 +1,11 @@
+**/.git
+**/.gitignore
+**/.mvn
+**/mvnw
+**/mvnw.cmd
+**/target
+.gitignore
+README.md
+settings.yml
+.github
+

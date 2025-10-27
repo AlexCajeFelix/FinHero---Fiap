@@ -1,0 +1,19 @@
+name: Main Workflow
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - closed
+    branches:
+      - main
+
+jobs:
+  publish-image:
+    if: github.event.pull_request.merged == true
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit
+
+    

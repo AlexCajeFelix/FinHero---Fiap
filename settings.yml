@@ -1,0 +1,41 @@
+
+java:
+  version: "21"
+  distribution: "temurin" 
+
+maven:
+  version: "3.9.5"
+  
+
+test:
+  jacoco:
+    enabled: true
+    report_path: "target/site/jacoco/jacoco.xml"
+    min_coverage: 90  
+
+build:
+  commands:
+    compile: "mvn clean compile"
+    install: "mvn clean install"
+    test: "mvn test"
+    skip_tests: "-DskipTests"
+    
+environment:
+  runs_on: "ubuntu-latest"  
+
+docker:
+  name: "finhero-app"
+  tag: "latest"
+  registry: "docker.io"  
+
+sonarcloud:
+  organization: "finhero"
+  project_key: "finhero_fiap_projeto-finhero"
+
+maven_options: ""
+github_actions:
+  checkout_version: "v4"
+  setup_java_version: "v4"
+  setup_maven_version: "v4.5"
+
+

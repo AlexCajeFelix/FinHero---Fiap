@@ -1,0 +1,12 @@
+name: Feature / Fix
+
+on:
+  push:
+    branches:
+      - feature/*
+      - fix/*
+
+jobs:
+  use-java-reusable-workflow:
+    uses: ./.github/workflows/javaReusable.yml
+    secrets: inherit

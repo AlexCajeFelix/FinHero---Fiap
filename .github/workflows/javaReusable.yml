@@ -1,0 +1,153 @@
+name: Java Reusable Workflow
+
+permissions:
+    contents: read
+    pull-requests: write
+    issues: write
+    actions: write
+    packages: write
+    deployments: write
+    repository-projects: write
+
+on:
+  workflow_call:
+    inputs:
+      java-version:
+        description: "Java version to use"
+        type: string
+        required: false
+        default: "21"
+      maven-version:
+        description: "Maven version to use"
+        type: string
+        required: false
+        default: "3.9.5"
+      java-distribution:
+        description: "Java distribution to use"
+        type: string
+        required: false
+        default: "temurin"
+      runs-on:
+        description: "Runner to use"
+        type: string
+        required: false
+        default: "ubuntu-latest"
+    secrets:
+      secret-key:
+        description: "Optional secret key"
+        required: false
+        
+jobs:
+  build:
+    runs-on: ${{ inputs.runs-on }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Read settings.yml
+        id: config
+        uses: cristian-ci/action-yaml-github-output@v2
+        with:
+          file: settings.yml
+          prefix: "config_"
+      
+      - name: Set defaults for missing config
+        id: final_config
+        run: |
+          echo "java_version=${{ steps.config.outputs.config_java_version || inputs.java-version }}" >> $GITHUB_OUTPUT
+          echo "java_distribution=${{ steps.config.outputs.config_java_distribution || inputs.java-distribution }}" >> $GITHUB_OUTPUT
+          echo "maven_version=${{ steps.config.outputs.config_maven_version || inputs.maven-version }}" >> $GITHUB_OUTPUT
+          echo "jacoco_enabled=${{ steps.config.outputs.config_test_jacoco_enabled || 'true' }}" >> $GITHUB_OUTPUT
+          echo "jacoco_report=${{ steps.config.outputs.config_test_jacoco_report_path || 'target/site/jacoco/jacoco.xml' }}" >> $GITHUB_OUTPUT
+          echo "min_coverage=${{ steps.config.outputs.config_test_jacoco_min_coverage || '0' }}" >> $GITHUB_OUTPUT
+      
+      - name: Set up JDK ${{ steps.final_config.outputs.java_version }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ steps.final_config.outputs.java_version }}
+          distribution: ${{ steps.final_config.outputs.java_distribution }}
+      
+      - name: Set up Maven ${{ steps.final_config.outputs.maven_version }}
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: ${{ steps.final_config.outputs.maven_version }}
+      
+      - name: Build with Maven
+        run: mvn clean install -DskipTests
+        
+      - name: Run tests with JaCoCo
+        if: steps.final_config.outputs.jacoco_enabled == 'true'
+        run: mvn jacoco:prepare-agent test jacoco:report
+        
+      - name: Run tests without JaCoCo
+        if: steps.final_config.outputs.jacoco_enabled != 'true'
+        run: mvn test
+      
+      - name: Generate JaCoCo Report
+        if: steps.final_config.outputs.jacoco_enabled == 'true'
+        run: mvn jacoco:report
+        continue-on-error: true
+        
+      - name: Publish JaCoCo Report
+        if: steps.final_config.outputs.jacoco_enabled == 'true'
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          coverage-files: ${{ steps.final_config.outputs.jacoco_report }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          badge: false
+          format: markdown
+          output: both
+      
+      - name: Check coverage threshold
+        if: steps.final_config.outputs.jacoco_enabled == 'true'
+        id: coverage_check
+        run: |
+          if [ -f ${{ steps.final_config.outputs.jacoco_report }} ]; then
+            COVERAGE=$(grep -oP 'type="INSTRUCTION" covered=\K[0-9]+' ${{ steps.final_config.outputs.jacoco_report }} | head -1 || echo "0")
+            echo "Current coverage: $COVERAGE%"
+            echo "Minimum required: ${{ steps.final_config.outputs.min_coverage }}%"
+            
+            if [ "$COVERAGE" -lt "${{ steps.final_config.outputs.min_coverage }}" ]; then
+              echo "Coverage is below minimum threshold!" 
+              exit 1
+            fi
+          fi
+      
+      - name: Display test results
+        if: always()
+        run: |
+          echo "## Test Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -d target/surefire-reports ]; then
+            echo "### Surefire Reports" >> $GITHUB_STEP_SUMMARY
+            echo "Reports location: target/surefire-reports" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ "${{ steps.final_config.outputs.jacoco_enabled }}" == "true" ] && [ -f ${{ steps.final_config.outputs.jacoco_report }} ]; then
+            echo "### JaCoCo Coverage" >> $GITHUB_STEP_SUMMARY
+            echo "Coverage report: ${{ steps.final_config.outputs.jacoco_report }}" >> $GITHUB_STEP_SUMMARY
+            echo "HTML report: target/site/jacoco/index.html" >> $GITHUB_STEP_SUMMARY
+            echo "Minimum coverage: ${{ steps.final_config.outputs.min_coverage }}%" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "JaCoCo enabled: ${{ steps.final_config.outputs.jacoco_enabled }}" >> $GITHUB_STEP_SUMMARY
+          echo "Java version: ${{ steps.final_config.outputs.java_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "Maven version: ${{ steps.final_config.outputs.maven_version }}" >> $GITHUB_STEP_SUMMARY
+
+  create-pull-request:
+    name: Create pull request
+    runs-on: ${{ inputs.runs-on }}
+    needs: build
+   
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Create pull request
+        uses: vsoch/pull-request-action@v3
+        with:
+          title: "Update Java version to ${{ inputs.java-version }}"
+          body: "This PR updates the Java version to ${{ inputs.java-version }}"
+          token: ${{ secrets.GITHUB_TOKEN }}
