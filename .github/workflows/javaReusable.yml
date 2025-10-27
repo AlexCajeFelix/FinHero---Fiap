@@ -124,23 +124,45 @@ jobs:
           echo "Maven version: ${{ steps.config.outputs.maven_version }}" >> $GITHUB_STEP_SUMMARY
 
   create-pull-request:
-    name: Create pull request
+    name: Criar Pull Request
     runs-on: ${{ inputs.runs-on }}
     needs: build
-   
+    if: github.ref != 'refs/heads/main'
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Create pull request
+      - name: Configure Git
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+      
+      - name: Criar Pull Request para Main
         uses: peter-evans/create-pull-request@v5
         with:
-          title: "Test: Build and Test Results"
-          body: |
-            ## ✅ Test Results
-            
-            Build and tests executed successfully!
-            
-            This PR was automatically created by the CI/CD workflow.
           token: ${{ secrets.GITHUB_TOKEN }}
-          branch: test-workflow-results
+          commit-message: "ci: adiciona resultados dos testes"
+          title: "🚀 CI/CD: Merge automático após validação"
+          body: |
+            ## ✅ Validação Completa dos Testes
+            
+            ### 📊 Resultados
+            - ✅ Build executado com sucesso
+            - ✅ Todos os testes passaram
+            - ✅ Cobertura de código validada com JaCoCo
+            
+            ### 🚀 Próximos passos após merge
+            - 🐳 Build da imagem Docker
+            - 📦 Push para Docker Hub
+            - 🌐 Deploy automático
+          branch: ${{ github.head_ref }}
+          base: main
+          labels: |
+            ci/cd
+            automated
+          draft: false
+          delete-branch: false
