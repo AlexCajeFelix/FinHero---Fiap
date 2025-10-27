@@ -8,6 +8,7 @@ class FinheroApplicationTests {
 
 	@Test
 	void contextLoads() {
+		// Test context loading - CI/CD validation
 	}
 
 }
