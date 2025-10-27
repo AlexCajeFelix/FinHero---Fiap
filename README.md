@@ -1,5 +1,7 @@
 # FinHero - FIAP
 
+🚀 Projeto Spring Boot com CI/CD automatizado
+
 ## Configuração de Secrets para GitHub Actions
 
 ### Para SonarCloud (Opcional)
