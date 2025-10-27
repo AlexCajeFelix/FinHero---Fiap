@@ -27,11 +27,8 @@
 		<url/>
 	</scm>
 	<properties>
-		<java.version>21</java.version>
-		<sonar.organization>alexcajefelix</sonar.organization>
-		<sonar.projectKey>alexcajefelix_finhero</sonar.projectKey>
-		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
-	</properties>
+  <sonar.organization>finhero</sonar.organization>
+</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
