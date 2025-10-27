@@ -1,8 +1,8 @@
 # Build stage
 FROM maven:3.9.5-eclipse-temurin-21 AS build
 WORKDIR /app
-COPY finhero/pom.xml .
-COPY finhero/src ./src
+COPY ./finhero/pom.xml .
+COPY ./finhero/src ./src
 RUN mvn clean package -DskipTests
 
 # Runtime stage
