@@ -28,8 +28,8 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
-		<sonar.organization>finhero</sonar.organization>
-		<sonar.projectKey>finhero_fiap_projeto-finhero</sonar.projectKey>
+		<sonar.organization>alexcajefelix</sonar.organization>
+		<sonar.projectKey>alexcajefelix_finhero</sonar.projectKey>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 	</properties>
 	<dependencies>

@@ -124,7 +124,7 @@ jobs:
         working-directory: finhero
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=finhero_fiap_projeto-finhero
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
         continue-on-error: true
       
       - name: Generate test summary
