@@ -48,8 +48,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "🔍 Running SonarCloud analysis..."
-          mvn clean verify sonar:sonar \
-            -Dsonar.host.url=https://sonarcloud.io \
+          mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+            -Dsonar.projectKey=AlexCajeFelix_FinHero---Fiap \
             -Dsonar.token=$SONAR_TOKEN \
             -Dsonar.login=$SONAR_TOKEN
         continue-on-error: true
