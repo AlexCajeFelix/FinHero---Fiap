@@ -10,6 +10,15 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  actions: write
+  packages: write
+  deployments: write
+  repository-projects: write
+
 jobs:
   publish-image:
     if: github.event.pull_request.merged == true

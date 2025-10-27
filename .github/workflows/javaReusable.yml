@@ -1,14 +1,5 @@
 name: Java Reusable Workflow
 
-permissions:
-    contents: read
-    pull-requests: write
-    issues: write
-    actions: write
-    packages: write
-    deployments: write
-    repository-projects: write
-
 on:
   workflow_call:
     inputs:

@@ -6,6 +6,15 @@ on:
       - feature/*
       - fix/*
 
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  actions: write
+  packages: write
+  deployments: write
+  repository-projects: write
+
 jobs:
   use-java-reusable-workflow:
     uses: ./.github/workflows/javaReusable.yml
