@@ -2,6 +2,8 @@
 
 🚀 Projeto Spring Boot com CI/CD automatizado
 
+✅ CI/CD configurado e testado
+
 ## Configuração de Secrets para GitHub Actions
 
 ### Para SonarCloud (Opcional)
