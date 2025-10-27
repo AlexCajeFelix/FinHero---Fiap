@@ -137,12 +137,10 @@ jobs:
         with:
           title: "Test: Build and Test Results"
           body: |
-            ## Test Results
+            ## ✅ Test Results
             
-            - Java version: ${{ steps.config.outputs.java_version }}
-            - Maven version: ${{ steps.config.outputs.maven_version }}
-            - JaCoCo enabled: ${{ steps.config.outputs.jacoco_enabled }}
+            Build and tests executed successfully!
             
-            Tests executed successfully! ✅
+            This PR was automatically created by the CI/CD workflow.
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: test-workflow-results
