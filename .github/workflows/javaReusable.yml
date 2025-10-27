@@ -83,16 +83,6 @@ jobs:
         working-directory: finhero
         run: mvn jacoco:report
         continue-on-error: true
-        
-      - name: Publish JaCoCo Report
-        if: steps.config.outputs.jacoco_enabled == 'true'
-        uses: irongut/CodeCoverageSummary@v1.3.0
-        with:
-          coverage-files: finhero/${{ steps.config.outputs.jacoco_report }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          badge: false
-          format: markdown
-          output: both
       
       - name: Check coverage threshold
         if: steps.config.outputs.jacoco_enabled == 'true'
