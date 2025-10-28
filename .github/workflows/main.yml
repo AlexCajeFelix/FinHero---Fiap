@@ -18,16 +18,19 @@ permissions:
   packages: write
   deployments: write
   repository-projects: write
+  security-events: write
 
 jobs:
-  publish-image:
+  build-and-test:
     if: github.event.pull_request.merged == true
-    uses: ./.github/workflows/deploy.yml
+    uses: ./.github/workflows/javaReusable.yml
     secrets: inherit
+  
   sonar-analysis:
     name: 📊 Analyze with SonarCloud
     runs-on: ubuntu-latest
-    if: always() && needs.build-and-test.result == 'success'
+    if: github.event.pull_request.merged == true
+    needs: build-and-test
     env:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     steps:
@@ -54,36 +57,12 @@ jobs:
             -Dsonar.token=$SONAR_TOKEN \
             -Dsonar.login=$SONAR_TOKEN
         continue-on-error: true
-  security-scan:
-      name: 🔒 Security Scan
-      runs-on: ubuntu-latest
-      if: always() && needs.build-and-test.result == 'success'
-      permissions:
-        contents: read
-        security-events: write
-      
-      steps:
-        - name: 📥 Checkout code
-          uses: actions/checkout@v4
-        
-        - name: 🔍 Run Trivy vulnerability scanner
-          uses: aquasecurity/trivy-action@master
-          with:
-            scan-type: 'fs'
-            scan-ref: '.'
-            format: 'sarif'
-            output: 'trivy-results.sarif'
-            severity: 'CRITICAL,HIGH'
-        
-        - name: 📤 Upload Trivy results to GitHub Security
-          uses: github/codeql-action/upload-sarif@v3
-          if: always()
-          with:
-            sarif_file: 'trivy-results.sarif'
-        
-        - name: 📋 Security Summary
-          run: |
-            echo "✅ Security scan completed"
-            echo "🔒 View results in: Security → Code scanning alerts"
+  
+  publish-image:
+    if: github.event.pull_request.merged == true
+    needs: build-and-test
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit
+  
 
     
