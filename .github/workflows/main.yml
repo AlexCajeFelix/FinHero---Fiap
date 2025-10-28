@@ -3,6 +3,7 @@ name: Main Workflow
 on:
   pull_request:
     types:
+      - closed
       - opened
       - synchronize
       - reopened
