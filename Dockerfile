@@ -1,4 +1,4 @@
-# Etapa de build (com cache otimizado)
+
 FROM maven:3.9.5-eclipse-temurin-21 AS build
 WORKDIR /app
 COPY ./finhero/pom.xml .
@@ -6,7 +6,7 @@ RUN mvn dependency:go-offline -B
 COPY ./finhero/src ./src
 RUN mvn clean package -DskipTests
 
-# Etapa de execução
+
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 COPY --from=build /app/target/finhero-0.0.1-SNAPSHOT.jar app.jar
